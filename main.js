@@ -1,4 +1,5 @@
 let deck;
+let inPlay;
 let spadesPics = [];
 let clubsPics = [];
 let diamondsPics = [];
@@ -7,10 +8,9 @@ let heartsPics = [];
 //Stages
 const PRE_GAME = "Pre Game";
 const START = "Start";
-const DRAW_CARDS = "Draw Cards";
 const PLACE_CARDS = "Place Cards";
-const GO_FISH = "Go Fish";
-const COUNT_POINTS = "Count Points";
+const DRAW_CARD = "Draw Card";
+const FINAL_3 = "Final 3";
 const END_GAME = "End Game";
 
 let currentStage;
@@ -18,10 +18,21 @@ let currentStage;
 let playerHand;
 let opponentHand;
 
+let whoseTurn;
+let playFirst;
+const PLAYER = "player";
+const OPPONENT = "opponent"
+
 let cardHeight = 120;
 let cardWidth = 75;
 
 let trumpSuit;
+
+let playerPoints;
+let opponentPoints;
+
+let oppPlayButton;
+let endSequence;
 
 class Deck {
     constructor(x, y) {
@@ -64,31 +75,66 @@ class Deck {
     }
 
     mouseOnDeck(px, py) {
+
         if(px > this.x && px < this.x + cardWidth) {
-                if(py > this.y && py < this.y + cardHeight) {
-                    playerHand.cards.push(this.cards[0]);
-                    this.cards.shift();
-                }
+            if(py > this.y && py < this.y + cardHeight) {
+                playerHand.cards.push(this.cards[0]);
+                this.cards.shift();
+
+                opponentHand.cards.push(this.cards[0]);
+                this.cards.shift();
+
+                whoseTurn = playFirst;
+
+                currentStage = PLACE_CARDS;
             }
+        }
+    }
+
+    assignPoints() {
+        for(let i = 0; i < this.cards.length; i++) {
+            if(this.cards[i].value == 10) {
+                this.cards[i].points = 11;
+            }
+            if(this.cards[i].value >= 1 && this.cards[i].value <= 5) {
+                this.cards[i].points = 0;
+            }
+            if(this.cards[i].value == 9) {
+                this.cards[i].points = 10;
+            }
+            if(this.cards[i].value == 6) {
+                this.cards[i].points = 2;
+            }
+            if(this.cards[i].value == 7) {
+                this.cards[i].points = 3;
+            }
+            if(this.cards[i].value == 8) {
+                this.cards[i].points = 4;
+            }
+        }
     }
 
     draw() {
-        for(let i = 0; i < this.cards.length - 1; i++) {
+        for(let i = 0; i < this.cards.length; i++) {
             image(backOfCardPic, this.x, this.y, cardWidth, cardHeight);
         }
 
-        if(this.cards[this.cards.length - 1].suit == "Spades") {
-            image(spadesPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
+        
+        if(this.cards.length > 0) {
+            if(this.cards[this.cards.length - 1].suit == "Spades") {
+                image(spadesPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
+            }
+            else if(this.cards[this.cards.length - 1].suit == "Clubs") {
+                image(clubsPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
+            }
+            else if(this.cards[this.cards.length - 1].suit == "Diamonds") {
+                image(diamondsPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
+            }
+            else if(this.cards[this.cards.length - 1].suit == "Hearts") {
+                image(heartsPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
+            }
         }
-        else if(this.cards[this.cards.length - 1].suit == "Clubs") {
-            image(clubsPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
-        }
-        else if(this.cards[this.cards.length - 1].suit == "Diamonds") {
-            image(diamondsPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
-        }
-        else if(this.cards[this.cards.length - 1].suit == "Hearts") {
-            image(heartsPics[this.cards[this.cards.length - 1].value - 1], this.x + cardWidth, this.y, cardWidth, cardHeight);
-        }
+        
     }
 }
 
@@ -98,31 +144,122 @@ class Hand {
         this.cards = [];
         this.x = x;
         this.y = y;
+        this.points;
     }
 
     mouseOnCard(px, py) {
+
         for(let i = 0; i < this.cards.length; i++) {
             if(px > this.x + cardWidth * i && px < this.x + cardWidth + cardWidth * i) {
-                if(py > this.y && py < this.y + cardHeight) {
-                    this.cards.splice(i, 1);
+                if(inPlay.cards.length !== 2) {
+                    if(whoseTurn == PLAYER) {
+                        if(playFirst == PLAYER) {
+                            if(py > this.y && py < this.y + cardHeight) {
+                                inPlay.cards.push(this.cards[i]);
+                                this.cards.splice(i, 1);
+                            }
+                        }
+                        else {
+                            if(py > this.y && py < this.y + cardHeight) {
+                                inPlay.cards.unshift(this.cards[i]);
+                                this.cards.splice(i, 1);
+                            }
+                        }
+
+                        if(playFirst == OPPONENT) {
+                            inPlay.y = (width / 2);
+                        }
+
+                            whoseTurn = OPPONENT;
+                    }
+
+                    if(inPlay.cards.length == 2) {
+                        inPlay.countPoints();
+                    }
+
+                    currentStage = PLACE_CARDS;
+                }
+                
+            }
+        }
+    }
+
+    draw() {
+        for(let i = 0; i < this.cards.length; i++) {
+            if(this.isOpponent == false) {
+                if(this.cards[i].suit == "Spades") {
+                    image(spadesPics[this.cards[i].value - 1], this.x + cardWidth * i, this.y, cardWidth, cardHeight);
+                }
+                else if(this.cards[i].suit == "Clubs") {
+                    image(clubsPics[this.cards[i].value - 1], this.x + cardWidth  * i, this.y, cardWidth, cardHeight);
+                }
+                else if(this.cards[i].suit == "Diamonds") {
+                    image(diamondsPics[this.cards[i].value - 1], this.x + cardWidth  * i, this.y, cardWidth, cardHeight);
+                }
+                else if(this.cards[i].suit == "Hearts") {
+                    image(heartsPics[this.cards[i].value - 1], this.x + cardWidth  * i, this.y, cardWidth, cardHeight);
                 }
             }
-        }     
+            else {
+                image(backOfCardPic, this.x + cardWidth * i, this.y, cardWidth, cardHeight);
+            }            
+        }
+    }
+}
+
+class InPlay {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.cards = [];
     }
 
     draw() {
         for(let i = 0; i < this.cards.length; i++) {
             if(this.cards[i].suit == "Spades") {
-                image(spadesPics[this.cards[i].value - 1], this.x + cardWidth * i, this.y, cardWidth, cardHeight);
+                image(spadesPics[this.cards[i].value - 1], this.x, this.y - cardHeight * i, cardWidth, cardHeight);
             }
             else if(this.cards[i].suit == "Clubs") {
-                image(clubsPics[this.cards[i].value - 1], this.x + cardWidth  * i, this.y, cardWidth, cardHeight);
+                image(clubsPics[this.cards[i].value - 1], this.x, this.y - cardHeight * i, cardWidth, cardHeight);
             }
             else if(this.cards[i].suit == "Diamonds") {
-                image(diamondsPics[this.cards[i].value - 1], this.x + cardWidth  * i, this.y, cardWidth, cardHeight);
+                image(diamondsPics[this.cards[i].value - 1], this.x, this.y - cardHeight * i, cardWidth, cardHeight);
             }
             else if(this.cards[i].suit == "Hearts") {
-                image(heartsPics[this.cards[i].value - 1], this.x + cardWidth  * i, this.y, cardWidth, cardHeight);
+                image(heartsPics[this.cards[i].value - 1], this.x, this.y - cardHeight * i, cardWidth, cardHeight);
+            }
+        }
+    }
+
+    countPoints() {
+        if(this.cards[0].suit !== this.cards[1].suit) {
+            if((this.cards[0].suit !== trumpSuit && this.cards[1].suit !== trumpSuit)) {
+                if(playFirst == PLAYER) {
+                    playerPoints += this.cards[0].points + this.cards[1].points;
+                    playFirst = PLAYER;
+                }
+                else if(playFirst == OPPONENT) {
+                    opponentPoints += this.cards[0].points + this.cards[1].points;
+                    playFirst = OPPONENT;
+                }
+            }
+            else if(this.cards[0].suit !== trumpSuit && this.cards[1].suit == trumpSuit) {
+                opponentPoints += this.cards[0].points + this.cards[1].points;
+                playFirst = OPPONENT;
+            }
+            else if(this.cards[0].suit == trumpSuit && this.cards[1].suit !== trumpSuit) {
+                playerPoints += this.cards[0].points + this.cards[1].points;
+                playFirst = PLAYER;
+            }
+        }
+        else {
+            if(this.cards[0].value >= this.cards[1].value) {
+                playerPoints += this.cards[0].points + this.cards[1].points;
+                playFirst = PLAYER;
+            }
+            else {
+                opponentPoints += this.cards[0].points + this.cards[1].points;
+                playFirst = OPPONENT;
             }
         }
     }
@@ -151,13 +288,28 @@ function setup() {
     rectMode(CENTER);
     angleMode(DEGREES);
     imageMode(CORNER);
+    
+    whoseTurn = PLAYER;
+    playFirst = PLAYER;
 
-    deck = new Deck(0, height * 0.4);
+    playerPoints = 0;
+    opponentPoints = 0;
+
+    deck = new Deck(0, (height / 2 - cardHeight / 2));
     deck.sortDeck();
+    deck.assignPoints()
 
-    playerHand = new Hand(width / 3, height - cardHeight, false);
-    opponentHand = new Hand(width / 3, 0, true);
+    playerHand = new Hand((width / 2 - cardWidth * 1.5), height - cardHeight, false);
+    opponentHand = new Hand((width / 2 - cardWidth * 1.5), 0, true);
+    inPlay = new InPlay((width / 2 - cardWidth / 2), height / 2);
+
+    oppPlayButton = createButton("OPP PLAY");
+    endSequence = createButton("END SEQ");
+
     deck.shuffle(deck.cards);
+
+    deck.dealCards();
+    trumpSuit = deck.cards[deck.cards.length - 1].suit;
 
     currentStage = START;
 }
@@ -165,53 +317,175 @@ function setup() {
 function draw() {
     background(0, 50, 50);
 
-    console.log(currentStage);
+    console.log(currentStage)
 
     if(currentStage == START) {
-        deck.dealCards();
-        trumpSuit = deck.cards[deck.cards.length - 1].suit;
-
-        console.log(trumpSuit);
-        console.log(deck.cards);
-        console.log(playerHand.cards);
-        console.log(opponentHand.cards);
-
         playerHand.draw();
         opponentHand.draw();
         deck.draw();
-
-        currentStage = PLACE_CARDS;
+        inPlay.draw();
+        whoPlaysFirst();
+        oppPlayButton.mousePressed(nextTurn);
+        endSequence.mousePressed(nextSequence);
     }
 
     else if(currentStage == PLACE_CARDS) {
         playerHand.draw();
         opponentHand.draw();
         deck.draw();
+        inPlay.draw();
+        whoPlaysFirst();
+        oppPlayButton.mousePressed(nextTurn);
+        endSequence.mousePressed(nextSequence);
+
+        if(deck.cards.length == 0) {
+            currentStage = FINAL_3;
+        }
     }
 
-    else if(currentStage == GO_FISH) {
+    else if(currentStage == DRAW_CARD) {
         playerHand.draw();
         opponentHand.draw();
         deck.draw();
+        inPlay.draw();
+        whoPlaysFirst();
+        oppPlayButton.mousePressed(nextTurn);
+        endSequence.mousePressed(nextSequence);
+    }
+
+    else if(currentStage == FINAL_3) {
+        playerHand.draw();
+        opponentHand.draw();
+        deck.draw();
+        inPlay.draw();
+        whoPlaysFirst();
+        oppPlayButton.mousePressed(nextTurn);
+        endSequence.mousePressed(nextSequence);
+
+        if(inPlay.cards.length == 0) {
+            endGame();
+        }
+    }
+
+    else if(currentStage == END_GAME) {
+        endScreen();
     }
         
 }
 
-function createCard(s, v) {
+function createCard(s, v, p) {
     return {
         suit: s,
         value: v,
+        points: p,
     }
 }
 
 function mousePressed() {
-    if(playerHand.cards.length > 2) {
+    if(deck.cards.length > 0) {
+        if(playerHand.cards.length > 2) {
+            playerHand.mouseOnCard(mouseX, mouseY)
+        }
+        if(currentStage == DRAW_CARD) {
+            deck.mouseOnDeck(mouseX, mouseY);
+        }
+    }
+    else {
         playerHand.mouseOnCard(mouseX, mouseY)
-        // currentStage = GO_FISH;
     }
+    
+    console.log(inPlay.cards)
+    console.log(whoseTurn)
+    console.log(playFirst)
+    // console.log(deck.cards.length)
 
-    if(playerHand.cards.length < 3) {
-        deck.mouseOnDeck(mouseX, mouseY);
-        // currentStage = PLACE_CARDS;
+    console.log("playerPoints: ", playerPoints, "opponentPoints: ", opponentPoints)
+}
+
+function whoPlaysFirst() {
+    let xPos = width - 50;
+    let yPos;
+
+    fill(255);
+    stroke(0);
+    if(playFirst == PLAYER) {
+        yPos = width - 50;
     }
+    else if(playFirst == OPPONENT) {
+        yPos = 50;
+    }
+    
+    rect(xPos, yPos, 10, 10);
+}
+
+function nextTurn() {
+    let cardPlayed = floor(random(0, 3));
+
+    if(inPlay.cards.length !== 2) {
+        if(whoseTurn == OPPONENT) {
+            if(opponentHand.cards.length > 2) {
+                inPlay.cards.push(opponentHand.cards[cardPlayed]);
+                opponentHand.cards.splice(cardPlayed, 1);
+            }
+            else {
+                inPlay.cards.push(opponentHand.cards[0]);
+                opponentHand.cards.splice(0, 1);
+            }
+
+            if(playFirst == OPPONENT) {
+                inPlay.y = (width / 2) - cardHeight;
+            }
+
+            whoseTurn = PLAYER;
+        }
+        
+        if(inPlay.cards.length == 2) {
+            inPlay.countPoints();
+        }
+    }
+    
+}
+
+function nextSequence() {
+    if(inPlay.cards.length == 2) {
+        if(deck.cards.length > 0) {
+            currentStage = DRAW_CARD;
+        }
+        
+        for(let i = 0; i < 2; i++) {
+            inPlay.cards.splice(i, 2);
+        }
+
+        if(playFirst == OPPONENT) {
+            if(whoseTurn == PLAYER) {
+                whoseTurn = playFirst;
+            }
+        }
+
+
+        else if(playFirst == PLAYER) {
+            if(whoseTurn == OPPONENT) {
+                whoseTurn = playFirst;
+            }
+        }
+    }
+}
+
+function endGame() {
+    if(playFirst == OPPONENT) {
+        if(playerHand.cards.length == 0) {
+            currentStage = END_GAME;
+        }
+    }
+    else if(playFirst == PLAYER) {
+        if(opponentHand.cards.length == 0) {
+            currentStage = END_GAME;
+        }
+    }
+}
+
+function endScreen() {
+    textAlign(CENTER, CENTER);
+    text("Opponent: " + opponentPoints, width / 2, 150);
+    text("Player: " + playerPoints, width / 2, height - 150);
 }
