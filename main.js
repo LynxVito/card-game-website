@@ -10,7 +10,6 @@ const PRE_GAME = "Pre Game";
 const START = "Start";
 const PLACE_CARDS = "Place Cards";
 const DRAW_CARD = "Draw Card";
-const FINAL_3 = "Final 3";
 const END_GAME = "End Game";
 
 let currentStage;
@@ -289,8 +288,16 @@ function setup() {
     angleMode(DEGREES);
     imageMode(CORNER);
     
-    whoseTurn = PLAYER;
-    playFirst = PLAYER;
+    let randomStart = floor(random(1, 3));
+
+    if(randomStart == 1) {
+        whoseTurn = PLAYER;
+        playFirst = PLAYER;
+    }
+    if(randomStart == 2) {
+        whoseTurn = OPPONENT;
+        playFirst = OPPONENT;
+    }
 
     playerPoints = 0;
     opponentPoints = 0;
@@ -338,8 +345,8 @@ function draw() {
         oppPlayButton.mousePressed(nextTurn);
         endSequence.mousePressed(nextSequence);
 
-        if(deck.cards.length == 0) {
-            currentStage = FINAL_3;
+        if(inPlay.cards.length == 0) {
+            endGame();
         }
     }
 
@@ -351,20 +358,6 @@ function draw() {
         whoPlaysFirst();
         oppPlayButton.mousePressed(nextTurn);
         endSequence.mousePressed(nextSequence);
-    }
-
-    else if(currentStage == FINAL_3) {
-        playerHand.draw();
-        opponentHand.draw();
-        deck.draw();
-        inPlay.draw();
-        whoPlaysFirst();
-        oppPlayButton.mousePressed(nextTurn);
-        endSequence.mousePressed(nextSequence);
-
-        if(inPlay.cards.length == 0) {
-            endGame();
-        }
     }
 
     else if(currentStage == END_GAME) {
@@ -421,7 +414,7 @@ function whoPlaysFirst() {
 function nextTurn() {
     let cardPlayed = floor(random(0, 3));
 
-    if(inPlay.cards.length !== 2) {
+    if(inPlay.cards.length !== 2 && currentStage !== DRAW_CARD) {
         if(whoseTurn == OPPONENT) {
             if(opponentHand.cards.length > 2) {
                 inPlay.cards.push(opponentHand.cards[cardPlayed]);
