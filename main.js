@@ -33,6 +33,8 @@ let opponentPoints;
 let oppPlayButton;
 let endSequence;
 
+let mainFont;
+
 class Deck {
     constructor(x, y) {
         this.cards = [];
@@ -280,6 +282,8 @@ function preload() {
         heartsPic = loadImage(`Playing Cards/card-hearts-${i}.png`);
         heartsPics.push(heartsPic);
     }
+
+    mainFont = loadFont(`/Fonts/ShareTech-Regular.ttf`);
 }
 
 function setup() {
@@ -324,7 +328,7 @@ function setup() {
 function draw() {
     background(0, 50, 50);
 
-    console.log(currentStage)
+    // console.log(currentStage)
 
     if(currentStage == START) {
         playerHand.draw();
@@ -334,6 +338,7 @@ function draw() {
         whoPlaysFirst();
         oppPlayButton.mousePressed(nextTurn);
         endSequence.mousePressed(nextSequence);
+        // endScreen();
     }
 
     else if(currentStage == PLACE_CARDS) {
@@ -387,9 +392,9 @@ function mousePressed() {
         playerHand.mouseOnCard(mouseX, mouseY)
     }
     
-    console.log(inPlay.cards)
-    console.log(whoseTurn)
-    console.log(playFirst)
+    // console.log(inPlay.cards)
+    // console.log(whoseTurn)
+    // console.log(playFirst)
     // console.log(deck.cards.length)
 
     console.log("playerPoints: ", playerPoints, "opponentPoints: ", opponentPoints)
@@ -400,7 +405,8 @@ function whoPlaysFirst() {
     let yPos;
 
     fill(255);
-    stroke(0);
+    noStroke();
+
     if(playFirst == PLAYER) {
         yPos = width - 50;
     }
@@ -408,7 +414,7 @@ function whoPlaysFirst() {
         yPos = 50;
     }
     
-    rect(xPos, yPos, 10, 10);
+    rect(xPos, yPos, 20, 20);
 }
 
 function nextTurn() {
@@ -478,7 +484,30 @@ function endGame() {
 }
 
 function endScreen() {
+    let winnerTextSize = 20;
+
+    textFont(mainFont);
     textAlign(CENTER, CENTER);
-    text("Opponent: " + opponentPoints, width / 2, 150);
-    text("Player: " + playerPoints, width / 2, height - 150);
+    strokeWeight(5);
+    fill(255);
+
+    if(opponentPoints > playerPoints) {
+        stroke()
+        textSize(winnerTextSize * 1.2);
+        text("Opponent: " + opponentPoints, width / 2, 200);
+        textSize(winnerTextSize);
+        text("Player: " + playerPoints, width / 2, height - 200);
+    }
+    else if(opponentPoints < playerPoints) {
+        textSize(winnerTextSize);
+        text("Opponent: " + opponentPoints, width / 2, 200);
+        textSize(winnerTextSize * 1.2);
+        text("Player: " + playerPoints, width / 2, height - 200);
+    }
+    else if(opponentPoints == playerPoints) {
+        textSize(winnerTextSize);
+        text("Opponent: " + opponentPoints, width / 2, 200);
+        text("Player: " + playerPoints, width / 2, height - 200);
+    }
+    
 }
