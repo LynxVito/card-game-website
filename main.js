@@ -6,7 +6,6 @@ let diamondsPics = [];
 let heartsPics = [];
 
 //Stages
-const PRE_GAME = "Pre Game";
 const START = "Start";
 const PLACE_CARDS = "Place Cards";
 const DRAW_CARD = "Draw Card";
@@ -32,6 +31,9 @@ let opponentPoints;
 
 let oppPlayButton;
 let endSequence;
+let restartButton;
+
+let restartButtonCreated = false;
 
 let mainFont;
 
@@ -314,17 +316,7 @@ function setup() {
     opponentHand = new Hand((width / 2 - cardWidth * 1.5), 0, true);
     inPlay = new InPlay((width / 2 - cardWidth / 2), height / 2);
 
-    oppPlayButton = createButton("OPP PLAY");
-    endSequence = createButton("END SEQ");
-
-    oppPlayButton.size(50, 50);
-    oppPlayButton.position(500, 400);
-    oppPlayButton.style("font-family", "Trebuchet MS");
-
-    endSequence.size(50, 50);
-    endSequence.position(500, 500);
-    endSequence.style("font-family", "Trebuchet MS");
-
+    createPlayingButtons();
 
     deck.shuffle(deck.cards);
 
@@ -337,8 +329,6 @@ function setup() {
 function draw() {
     background(0, 50, 50);
 
-    // console.log(currentStage)
-
     if(currentStage == START) {
         playerHand.draw();
         opponentHand.draw();
@@ -347,7 +337,6 @@ function draw() {
         whoPlaysFirst();
         oppPlayButton.mousePressed(nextTurn);
         endSequence.mousePressed(nextSequence);
-        // endScreen();
     }
 
     else if(currentStage == PLACE_CARDS) {
@@ -375,9 +364,13 @@ function draw() {
     }
 
     else if(currentStage == END_GAME) {
+        oppPlayButton.remove();
+        endSequence.remove();
         endScreen();
+
+        createRestartButton();
+        restartButton.mousePressed(restart);
     }
-        
 }
 
 function createCard(s, v, p) {
@@ -400,11 +393,6 @@ function mousePressed() {
     else {
         playerHand.mouseOnCard(mouseX, mouseY)
     }
-    
-    // console.log(inPlay.cards)
-    // console.log(whoseTurn)
-    // console.log(playFirst)
-    // console.log(deck.cards.length)
 
     console.log("playerPoints: ", playerPoints, "opponentPoints: ", opponentPoints)
 }
@@ -526,6 +514,77 @@ function endScreen() {
         textSize(winnerTextSize);
         text("Opponent: " + opponentPoints, width / 2, 150);
         text("Player: " + playerPoints, width / 2, height - 150);
+    }   
+}
+
+function restart() {
+    opponentPoints = 0;
+    playerPoints = 0;
+    currentStage = START;
+
+    let randomStart = floor(random(1, 3));
+
+    if(randomStart == 1) {
+        whoseTurn = PLAYER;
+        playFirst = PLAYER;
     }
-    
+    if(randomStart == 2) {
+        whoseTurn = OPPONENT;
+        playFirst = OPPONENT;
+    }
+
+    deck = new Deck(0, (height / 2 - cardHeight / 2));
+    deck.sortDeck();
+    deck.assignPoints()
+
+    playerHand = new Hand((width / 2 - cardWidth * 1.5), height - cardHeight, false);
+    opponentHand = new Hand((width / 2 - cardWidth * 1.5), 0, true);
+    inPlay = new InPlay((width / 2 - cardWidth / 2), height / 2);
+
+    createPlayingButtons();
+
+    deck.shuffle(deck.cards);
+
+    deck.dealCards();
+    trumpSuit = deck.cards[deck.cards.length - 1].suit;
+
+    restartButton.remove();
+
+    restartButtonCreated = false;
+}
+
+function createRestartButton() {
+    let bgCol = color(255, 50);
+    let col = color(255);
+
+    if(!restartButtonCreated) {
+        restartButton = createButton("RESTART");
+        restartButton.style("background-color", bgCol);
+        restartButton.style("color", col);
+        restartButton.style("font-size", "20px");
+        restartButton.size(200, 50);
+        restartButton.position(210, 425);
+        restartButton.style("font-family", "Trebuchet MS");
+        restartButtonCreated = true;
+    }
+}
+
+function createPlayingButtons() {
+    let bgCol = color(255, 50);
+    let col = color(220);
+
+    oppPlayButton = createButton("OPP PLAY");
+    endSequence = createButton("END TURN");
+
+    oppPlayButton.size(50, 50);
+    oppPlayButton.position(500, 375);
+    oppPlayButton.style("font-family", "Trebuchet MS");
+    oppPlayButton.style("background-color", bgCol);
+    oppPlayButton.style("color", col);
+
+    endSequence.size(50, 50);
+    endSequence.position(500, 475);
+    endSequence.style("font-family", "Trebuchet MS");
+    endSequence.style("background-color", bgCol);
+    endSequence.style("color", col);
 }
