@@ -603,13 +603,11 @@ function createPlayingButtons() {
     positionButtons();
 
     oppPlayButton.size(50, 50);
-    // oppPlayButton.position(500, 375);
     oppPlayButton.style("font-family", "Trebuchet MS");
     oppPlayButton.style("background-color", bgCol);
     oppPlayButton.style("color", col);
 
     endSequence.size(50, 50);
-    // endSequence.position(500, 475);
     endSequence.style("font-family", "Trebuchet MS");
     endSequence.style("background-color", bgCol);
     endSequence.style("color", col);
