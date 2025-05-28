@@ -8,14 +8,35 @@
 </head>
 <body>
     <header>
+        <h1>BISCA</h1>
         <nav>
             <ul>
-                <li><a href="./MainPage.html">Main Page</a></li>
+                <li><a href="./MainPage.html">New Game</a></li>
                 <li><a href="./HowToPlay.html">How To Play</a></li>
                 <li><a href="#">Profile</a></li>
             </ul>
         </nav>
     </header>
+    <main>
+        <h2>How To Play</h2>
+        <p>This is a game for two players, where the goal is to have more points than your opponent by the time you run out of playing cards. Each player is dealt 3 cards, with an additional 'trump' card being dealt and placed beside the deck. Whoever starts will place one card face up in the middle of the playing field, and their opponent will follow by doing the same. The following procedure will determine who will capture both played cards:</p>
+        <ul>
+            <li>If the cards have the same suit, the card of the highest value wins</li>
+            <li>If the cards are of different suits and there is no 'trump' card played, then whoever played first automatically wins the turn</li>
+            <li>If the cards are of different suits and there is a 'trump' card played, then the player with the trump card wins the turn</li>
+        </ul>
+        <p>The players, now with only two cards in the deck, will draw a card each. The next turn starts with the player who won the previous turn playing first.</p>
+        <p>Once no cards remain in play, points are added up for both players. With a total of 120 points, whoever passes 60 points will win the game. </p>
+        <h2>Scoring</h2>
+        <ul id="cards">
+            <li>Ace: 11 points</li>
+            <li>Seven: 10 points</li>
+            <li>King: 4 points</li>
+            <li>Jack: 3 points</li>
+            <li>Queen: 2 points</li>
+            <li>The rest: 0 points</li>
+        </ul>
+    </main>
 
-    <script src="./main.js"></script>
+    <!-- <script src="./main.js"></script> -->
 </body>

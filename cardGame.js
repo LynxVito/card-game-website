@@ -37,6 +37,8 @@ let restartButtonCreated = false;
 
 let mainFont;
 
+let cnv;
+
 class Deck {
     constructor(x, y) {
         this.cards = [];
@@ -288,8 +290,23 @@ function preload() {
     mainFont = loadFont(`/Fonts/ShareTech-Regular.ttf`);
 }
 
+function centerCanvas() {
+    cnv.position((windowWidth - width) / 2, 220);
+}
+
+function positionButtons() {
+    oppPlayButton.position(((windowWidth - width) / 2) + 500, 450);
+    endSequence.position(((windowWidth - width) / 2) + 500, 550);
+}
+
+function positionRestartButton() {
+    restartButton.position(((windowWidth - width) / 2) + 200, 500);
+}
+
 function setup() {
-    createCanvas(600, 600);
+
+    cnv = createCanvas(600, 600);
+    centerCanvas();
     rectMode(CENTER);
     angleMode(DEGREES);
     imageMode(CORNER);
@@ -324,6 +341,12 @@ function setup() {
     trumpSuit = deck.cards[deck.cards.length - 1].suit;
 
     currentStage = START;
+}
+
+function windowResized() {
+    centerCanvas();
+    positionButtons();
+    positionRestartButton();
 }
 
 function draw() {
@@ -563,7 +586,8 @@ function createRestartButton() {
         restartButton.style("color", col);
         restartButton.style("font-size", "20px");
         restartButton.size(200, 50);
-        restartButton.position(210, 425);
+        // restartButton.position(210, 425);
+        positionRestartButton();
         restartButton.style("font-family", "Trebuchet MS");
         restartButtonCreated = true;
     }
@@ -576,14 +600,16 @@ function createPlayingButtons() {
     oppPlayButton = createButton("OPP PLAY");
     endSequence = createButton("END TURN");
 
+    positionButtons();
+
     oppPlayButton.size(50, 50);
-    oppPlayButton.position(500, 375);
+    // oppPlayButton.position(500, 375);
     oppPlayButton.style("font-family", "Trebuchet MS");
     oppPlayButton.style("background-color", bgCol);
     oppPlayButton.style("color", col);
 
     endSequence.size(50, 50);
-    endSequence.position(500, 475);
+    // endSequence.position(500, 475);
     endSequence.style("font-family", "Trebuchet MS");
     endSequence.style("background-color", bgCol);
     endSequence.style("color", col);
