@@ -1,0 +1,38 @@
+form > div:first-of-type {
+    display: flex;
+    gap: 0.5em;
+}
+
+input {
+    border: solid 2px #265226;
+    border-radius: 5px;
+    padding: 10px;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    caret-color: white;
+    color: white;
+}
+
+input:focus {
+    outline: solid 2px rgba(255, 255, 255, 0.534);
+}
+
+input::placeholder {
+    color: rgba(219, 230, 217, 0.918);
+    font-style: italic;
+}
+
+button {
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #ffffffd5;
+}

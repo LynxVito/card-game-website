@@ -6,6 +6,12 @@ body {
     color: white;
 }
 
+main {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
 nav li {
     color: white;
     display: inline-block;
@@ -20,7 +26,8 @@ nav li a {
     border-radius: 4px;
 }
 
-nav li a:hover {
+nav li a:hover,
+nav li a.active {
     background-color: #1d2b1996;
     cursor: pointer;
 }
@@ -28,7 +35,8 @@ nav li a:hover {
 nav ul {
     list-style-type: none;
     text-align: center;
-    margin-left: -45px;
+    margin-left: -100px;
+    margin-right: -60px;
 }
 
 h1 {
@@ -43,6 +51,11 @@ h2 {
 }
 
 #cards {
-    list-style-type: none;
+    list-style: none;
     margin-left: -40px;
+}
+
+* {
+    list-style: none;
+    box-sizing: border-box;
 }

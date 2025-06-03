@@ -39,6 +39,8 @@ let mainFont;
 
 let cnv;
 
+let gameHasEnded;
+
 class Deck {
     constructor(x, y) {
         this.cards = [];
@@ -57,7 +59,7 @@ class Deck {
         }
     }
 
-    // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+    // Copied code from: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 
     shuffle(array) {
         let currentIndex = array.length;
@@ -69,6 +71,8 @@ class Deck {
             [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
         }
     }
+
+    // end of copied code
 
     dealCards() {
         for (let i = 0; i < 3; i++) {
@@ -304,6 +308,7 @@ function positionRestartButton() {
 }
 
 function setup() {
+    gameHasEnded = false;
 
     cnv = createCanvas(600, 600);
     centerCanvas();
@@ -344,9 +349,14 @@ function setup() {
 }
 
 function windowResized() {
-    centerCanvas();
-    positionButtons();
-    positionRestartButton();
+    if(currentStage !== END_GAME) {
+        centerCanvas();
+        positionButtons();
+    }
+
+    if(currentStage == END_GAME) {
+        positionRestartButton();
+    }
 }
 
 function draw() {
@@ -390,6 +400,11 @@ function draw() {
         oppPlayButton.remove();
         endSequence.remove();
         endScreen();
+
+        if(gameHasEnded) {
+            saveScores();
+            gameHasEnded = false;
+        }
 
         createRestartButton();
         restartButton.mousePressed(restart);
@@ -498,11 +513,13 @@ function nextSequence() {
 function endGame() {
     if(playFirst == OPPONENT) {
         if(playerHand.cards.length == 0) {
+            gameHasEnded = true;
             currentStage = END_GAME;
         }
     }
     else if(playFirst == PLAYER) {
         if(opponentHand.cards.length == 0) {
+            gameHasEnded = true;
             currentStage = END_GAME;
         }
     }
@@ -544,6 +561,7 @@ function restart() {
     opponentPoints = 0;
     playerPoints = 0;
     currentStage = START;
+    gameHasEnded = false;
 
     let randomStart = floor(random(1, 3));
 
@@ -611,4 +629,28 @@ function createPlayingButtons() {
     endSequence.style("font-family", "Trebuchet MS");
     endSequence.style("background-color", bgCol);
     endSequence.style("color", col);
+}
+
+function saveScores() {
+    let currentScores = [];
+    let player = "Anonymous";
+
+    if(sessionStorage.getItem("inGameName") !== null) {
+        player = sessionStorage.getItem("inGameName");
+    }
+    if(localStorage.getItem("gameStorage") !== null) {
+        currentScores = JSON.parse(localStorage.getItem("gameStorage"));
+    }
+
+    currentScores.push({
+        player: player, 
+        playerScore: playerPoints, 
+        enemyScore: opponentPoints
+    })
+
+    currentScores.sort( (a, b) => b.playerScore - a.playerScore)
+
+    currentScores.splice(5);
+
+    localStorage.setItem("gameStorage", JSON.stringify(currentScores));
 }
