@@ -11,7 +11,12 @@ const PLACE_CARDS = "Place Cards";
 const DRAW_CARD = "Draw Card";
 const END_GAME = "End Game";
 
+const PLACE_PLAYER_CARD = "Player Card";
+const PLACE_OPP_CARD = "Opponent Card";
+const END_TURN = "End Turn";
+
 let currentStage;
+let highlightStage;
 
 let playerHand;
 let opponentHand;
@@ -87,6 +92,7 @@ class Deck {
 
         if(px > this.x && px < this.x + cardWidth) {
             if(py > this.y && py < this.y + cardHeight) {
+                highlightStage = START;
                 playerHand.cards.push(this.cards[0]);
                 this.cards.shift();
 
@@ -164,12 +170,14 @@ class Hand {
                     if(whoseTurn == PLAYER) {
                         if(playFirst == PLAYER) {
                             if(py > this.y && py < this.y + cardHeight) {
+                                highlightStage = PLACE_OPP_CARD;
                                 inPlay.cards.push(this.cards[i]);
                                 this.cards.splice(i, 1);
                             }
                         }
                         else {
                             if(py > this.y && py < this.y + cardHeight) {
+                                highlightStage = END_TURN;
                                 inPlay.cards.unshift(this.cards[i]);
                                 this.cards.splice(i, 1);
                             }
@@ -188,7 +196,6 @@ class Hand {
 
                     currentStage = PLACE_CARDS;
                 }
-                
             }
         }
     }
@@ -346,6 +353,7 @@ function setup() {
     trumpSuit = deck.cards[deck.cards.length - 1].suit;
 
     currentStage = START;
+    highlightStage = START;
 }
 
 function windowResized() {
@@ -409,6 +417,8 @@ function draw() {
         createRestartButton();
         restartButton.mousePressed(restart);
     }
+
+    highlights();
 }
 
 function createCard(s, v, p) {
@@ -457,12 +467,60 @@ function whoPlaysFirst() {
     circle(width - 70, 70, 20, 20);
 }
 
+function highlights() {
+    let highlightX;
+    let hightlightWidth;
+
+    if(currentStage !== END_GAME) {
+        if(highlightStage == START) {
+            if(playFirst == OPPONENT) {
+                highlightStage = PLACE_OPP_CARD;
+            }
+            else if(playFirst == PLAYER) {
+                highlightStage = PLACE_PLAYER_CARD;
+            }
+        }
+
+        if(playerHand.cards.length == 3) {
+            highlightX = width / 2;
+            hightlightWidth = cardWidth * 3;
+        }
+        if(playerHand.cards.length == 2) {
+            highlightX = width / 2 - cardWidth * 0.5;
+            hightlightWidth = cardWidth * 2;
+        }
+        if(playerHand.cards.length == 1) {
+            highlightX = width / 2 - cardWidth;
+            hightlightWidth = cardWidth;
+        }
+
+        stroke(255);
+        strokeWeight(4);
+        fill(255, 20);
+
+        if(highlightStage == DRAW_CARD) {
+            rect(cardWidth / 2, height / 2, cardWidth, cardHeight, 2);
+        }
+        if(highlightStage == PLACE_PLAYER_CARD) {
+            rect(highlightX, height - cardHeight / 2, hightlightWidth, cardHeight, 2);
+        }
+        if(highlightStage == PLACE_OPP_CARD) {
+            rect(width - 75, width / 2 - 45, 50, 50, 2);
+        }
+        if(highlightStage == END_TURN) {
+            rect(width - 75, width / 2 + 55, 50, 50, 2);
+        }
+    }
+    
+}
+
 function nextTurn() {
     let cardPlayed = floor(random(0, 3));
 
     if(inPlay.cards.length !== 2 && currentStage !== DRAW_CARD) {
         if(whoseTurn == OPPONENT) {
             if(opponentHand.cards.length > 2) {
+                highlightStage = END_TURN;
                 inPlay.cards.push(opponentHand.cards[cardPlayed]);
                 opponentHand.cards.splice(cardPlayed, 1);
             }
@@ -472,6 +530,7 @@ function nextTurn() {
             }
 
             if(playFirst == OPPONENT) {
+                highlightStage = PLACE_PLAYER_CARD;
                 inPlay.y = (width / 2) - cardHeight;
             }
 
@@ -489,10 +548,20 @@ function nextSequence() {
     if(inPlay.cards.length == 2) {
         if(deck.cards.length > 0) {
             currentStage = DRAW_CARD;
+            highlightStage = DRAW_CARD;
         }
         
         for(let i = 0; i < 2; i++) {
             inPlay.cards.splice(i, 2);
+        }
+
+        if(deck.cards.length == 0) {
+            if(playFirst == OPPONENT) {
+                highlightStage = PLACE_OPP_CARD;
+            }
+            if(playFirst == PLAYER) {
+                highlightStage = PLACE_PLAYER_CARD;
+            }
         }
 
         if(playFirst == OPPONENT) {
@@ -561,6 +630,7 @@ function restart() {
     opponentPoints = 0;
     playerPoints = 0;
     currentStage = START;
+    highlightStage = START;
     gameHasEnded = false;
 
     let randomStart = floor(random(1, 3));

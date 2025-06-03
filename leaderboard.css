@@ -8,7 +8,6 @@
 
 .leaderboard > div {
     min-height: 330px;
-    /* overflow-y: scroll; */
     background: #36502d96;
     border-radius: 5px;
 }

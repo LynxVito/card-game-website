@@ -26,9 +26,14 @@ nav li a {
     border-radius: 4px;
 }
 
-nav li a:hover,
-nav li a.active {
+nav li a:hover {
     background-color: #1d2b1996;
+    outline: solid 2px #ffffff;
+    cursor: pointer;
+}
+
+nav li a.active {
+    outline: solid 2px #ffffff;
     cursor: pointer;
 }
 
@@ -56,6 +61,5 @@ h2 {
 }
 
 * {
-    list-style: none;
     box-sizing: border-box;
 }

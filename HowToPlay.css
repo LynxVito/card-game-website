@@ -3,3 +3,11 @@ main {
     display: block;
     justify-content: center;
 }
+
+main ul {
+    list-style: disc;
+}
+
+main ul li {
+    padding: 6px;
+}
