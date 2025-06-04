@@ -1,6 +1,5 @@
 const savedScores = JSON.parse(localStorage.getItem("gameStorage"));
 
-
 if(savedScores !== null) {
     const table = document.getElementById("scores");
     for(const score of savedScores) {
