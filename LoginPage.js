@@ -6,5 +6,5 @@ saveBtn.addEventListener("click", function(event) {
     sessionStorage.setItem("inGameName", name);
 
     // Go to the next page
-    window.location.href = window.location.href.replace("/LoginPage.html", "/MainPage.html");
+    window.location.href = window.location.href.replace("/index.html", "/MainPage.html");
 })
